@@ -1,0 +1,99 @@
+#!/usr/bin/python3
+
+# lib require
+# pip3 install python-gitlab
+
+import gitlab
+import sys
+import os
+from mypythonlib import exe, exe_arr
+
+GITLAB_BASE_URL = 'https://gitlab.internal.XXXXX.com'  # update your company's gitlab
+wd=os.getcwd()
+PROJECT=wd.split('/')[-1]
+PRIVATE_TOKEN = 'xxxxxxxx'    # update your token
+gl = gitlab.Gitlab(GITLAB_BASE_URL, PRIVATE_TOKEN)
+
+def getApprover(projectId):
+  targetProject = gl.projects.get(projectId)
+  members = targetProject.members_all.list(get_all=True)
+  approvers = []
+  for member in members:
+    if 'GitLab' in member.name or 'Zhong' in member.name or 'Jingjing' in member.name:
+      continue
+    if member.access_level >= 40:
+      approvers.append(member)
+      print(member.name, member.id)
+  
+
+  for approver in approvers:
+    if 'Andy' in approver.name:
+      print('Assign to Andy')
+      return 2054
+
+
+  print('Assign to Alex') 
+  return 2046
+    
+
+def mr(branch, title):
+  print('creating mr on branch:'+branch+', with title:'+title)
+  projects = gl.projects.list(search=PROJECT, owned=True)
+  myProject = None
+  for prj in projects:
+    if prj.path == PROJECT and 'To-Be-Deleted' not in prj.name_with_namespace:
+      myProject = prj
+      #print(prj)
+      break
+
+
+  if myProject == None:
+    print('error! no project found:')
+    print(projects)
+    sys.exit(1)
+
+  sourceProjectId = myProject.id
+  targetProjectId = myProject.forked_from_project['id']
+  assert sourceProjectId != 0
+  assert targetProjectId != 0
+  reviewer = getApprover(targetProjectId)
+
+  description='''
+  # Check List
+  - [x] Has a meaningful MR title
+  - [x] Has test case to cover the change
+  - Document updated:
+    - [x] CHANGELOG
+    - [ ] README
+    - [ ] Swagger API doc
+    - [ ] UML diagram
+  # Description
+  '''+title
+
+  res=myProject.mergerequests.create({
+    'source_branch': branch,
+    'target_branch': branch,
+    'target_project_id': targetProjectId,
+    'title': title,
+
+    'assignee_id': reviewer,
+    'description': description
+  })
+  print('successfully create mr on '+branch)
+  print('帮忙review: '+res.web_url+ ' 谢谢!')
+
+
+
+if __name__ == '__main__':
+  title = 'invalid title'
+  if len(sys.argv) == 2:
+    printMyMrs()
+    sys.exit(0)
+  else:
+    title=exe('git log -1')
+    title=title.split('\n')[4]
+
+  branch=exe('git rev-parse --abbrev-ref HEAD')
+  branch=branch.replace('\n','')
+
+  mr(branch, title)
