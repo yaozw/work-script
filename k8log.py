@@ -26,7 +26,7 @@ def esc(str):
 
 def parseLines(lines):
   for line in lines:
-    # {"version":"1.2.0","timestamp":"2023-12-28T02:24:33.776341534Z","severity":"debug","service_id":"ses-c85-ft5-umb2-eric-ses-etmapigateway","message":"Internal health check hit...","metadata":{"level":20,"category":"etmapigateway.service-launch","transactionId":"","tenantId":"","traceId":"","server-type":"mts","hostname":"ses-c85-ft5-umb2-eric-ses-etmapigateway-220.2.100-656d6ccdl2xmr","pid":24}}
+    # {"version":"1.2.0","timestamp":"2023-12-28T02:24:33.776341534Z","severity":"debug","service_id":"gateway","message":"Internal health check hit...","metadata":{"level":20,"category":"gateway.service-launch","transactionId":"","tenantId":"","traceId":"","server-type":"mts","hostname":"gateway-220.2.100-656d6ccdl2xmr","pid":24}}
 
     try:
       logObj = json.loads(line)
