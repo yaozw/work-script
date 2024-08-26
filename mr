@@ -85,13 +85,8 @@ def mr(branch, title):
 
 
 if __name__ == '__main__':
-  title = 'invalid title'
-  if len(sys.argv) == 2:
-    printMyMrs()
-    sys.exit(0)
-  else:
-    title=exe('git log -1')
-    title=title.split('\n')[4]
+  title=exe('git log -1')
+  title=title.split('\n')[4]
 
   branch=exe('git rev-parse --abbrev-ref HEAD')
   branch=branch.replace('\n','')
